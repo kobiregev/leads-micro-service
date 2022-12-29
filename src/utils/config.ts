@@ -9,6 +9,7 @@ const schema = Type.Object({
     default: '0.0.0.0',
   }),
   FACEBOOK_APP_TOKEN: Type.String(),
+  DATABASE_URL: Type.String(),
 });
 
 type Env = Static<typeof schema>;

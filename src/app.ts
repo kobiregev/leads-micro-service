@@ -1,8 +1,9 @@
-import { config } from "./utils/config";
-import { createServer } from "./utils/createServer";
-import { logger } from "./utils/logger";
+import { config } from './utils/config';
+import { createServer } from './utils/createServer';
+import { connectToDb, disconnectFromDb } from './utils/db';
+import { logger } from './utils/logger';
 
-const signals = ["SIGNT", "SIGTERM", "SIGHUP"] as const;
+const signals = ['SIGNT', 'SIGTERM', 'SIGHUP'] as const;
 
 async function gracefulShutdown({
   signal,
@@ -13,6 +14,9 @@ async function gracefulShutdown({
 }) {
   logger.info(`Got signal ${signal}. Good bye`);
   await server.close();
+
+  await disconnectFromDb();
+
   process.exit(0);
 }
 
@@ -23,6 +27,8 @@ async function startServer() {
     port: config.PORT,
     host: config.HOST,
   });
+
+  await connectToDb();
 
   logger.info(`App is listening`);
 
