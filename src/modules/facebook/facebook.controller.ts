@@ -2,10 +2,16 @@ import { FastifyReply } from 'fastify/types/reply';
 import { FastifyRequest } from 'fastify/types/request';
 import { logger } from '../../utils/logger';
 import {
+  CreateLeadgenSubscriptionQuery,
   GetPageFormsQueryType,
   GetUserPagesQueryType,
 } from './facebook.schema';
-import { getPageForms, getUserPages } from './facebook.service';
+import {
+  createFacebok,
+  getPageForms,
+  getUserPages,
+  subscribePageToApp,
+} from './facebook.service';
 
 // Not Implemnted
 export function getNewLeadDataHandler(
@@ -17,6 +23,34 @@ export function getNewLeadDataHandler(
   } catch (error) {
     logger.error(error, 'getNewLeadDataHandler: error getting new lead');
     return reply.code(400).send({ message: 'Error getting new lead' });
+  }
+}
+
+// get form id and page id
+// subscribe page to app
+// create facebook(formId,pageId)
+
+export async function createLeadgenSubscriptionHandler(
+  request: FastifyRequest<{ Querystring: CreateLeadgenSubscriptionQuery }>,
+  reply: FastifyReply
+) {
+  try {
+    const data = await subscribePageToApp(request.query);
+    if (data.success) {
+      const facebook = await createFacebok({
+        formId: request.query.form_id,
+        pageId: request.query.page_id,
+      });
+      reply.code(200).send(facebook);
+    }
+  } catch (error) {
+    logger.error(
+      error,
+      'createLeadgenSubscriptionHandler: error creating leadgen subscription'
+    );
+    return reply
+      .code(400)
+      .send({ message: 'Error creating leadgen subscription' });
   }
 }
 
