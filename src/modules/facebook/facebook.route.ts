@@ -8,6 +8,7 @@ import {
 } from './facebook.controller';
 import {
   createLeadgenSubscriptionSchema,
+  getNewLeadDataSchema,
   getPageFormsSchema,
   getUserPagesSchema,
 } from './facebook.schema';
@@ -18,7 +19,7 @@ export function facebookRoute(
   done: () => void
 ) {
   app.get('/webhook', webhookChallengeHandler);
-  app.post('/webhook', getNewLeadDataHandler);
+  app.post('/webhook', { schema: getNewLeadDataSchema }, getNewLeadDataHandler);
   app.get('/pages', { schema: getUserPagesSchema }, getUserPagesHandler);
   app.get('/forms', { schema: getPageFormsSchema }, getPageFormsHandler);
   app.get(

@@ -5,6 +5,9 @@ export class Facebook {
 
   @prop({ type: String, required: true, unique: true })
   formId: string;
+
+  @prop({ type: String, required: true })
+  page_access_token: string;
 }
 
 export const FacebookModel = getModelForClass(Facebook, {
