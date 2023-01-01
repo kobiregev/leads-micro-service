@@ -2,21 +2,75 @@ import { FastifyReply } from 'fastify/types/reply';
 import { FastifyRequest } from 'fastify/types/request';
 import { logger } from '../../utils/logger';
 import {
+  CreateLeadgenSubscriptionQuery,
+  GetNewLeadDataBody,
   GetPageFormsQueryType,
   GetUserPagesQueryType,
 } from './facebook.schema';
-import { getPageForms, getUserPages } from './facebook.service';
+import {
+  createFacebok,
+  findFacebookLeadgenInfo,
+  getFullLeadData,
+  getLongLivedPageAccessToken,
+  getPageForms,
+  getUserPages,
+  subscribePageToApp,
+} from './facebook.service';
 
 // Not Implemnted
-export function getNewLeadDataHandler(
-  request: FastifyRequest,
+export async function getNewLeadDataHandler(
+  request: FastifyRequest<{ Body: GetNewLeadDataBody }>,
   reply: FastifyReply
 ) {
   try {
-    logger.info(request.body);
+    const formId = request.body.entry[0].changes[0].value.form_id;
+    const pageId = request.body.entry[0].changes[0].value.page_id;
+    const leadId = request.body.entry[0].changes[0].value.leadgen_id;
+    // getFullLeadInfo
+    const leadInfo = await findFacebookLeadgenInfo({ formId, pageId });
+    if (!leadInfo)
+      return reply.code(400).send({
+        message: "Error can't find lead with provided formId & pageId",
+      });
+
+    const leadData = await getFullLeadData(leadId, leadInfo.page_access_token);
+    logger.info(leadData);
   } catch (error) {
     logger.error(error, 'getNewLeadDataHandler: error getting new lead');
     return reply.code(400).send({ message: 'Error getting new lead' });
+  }
+}
+
+// get form id and page id
+// subscribe page to app
+// create facebook(formId,pageId)
+
+export async function createLeadgenSubscriptionHandler(
+  request: FastifyRequest<{ Querystring: CreateLeadgenSubscriptionQuery }>,
+  reply: FastifyReply
+) {
+  try {
+    //subscribing page to app
+    const data = await subscribePageToApp(request.query);
+    // get Long lived page token
+    if (!data.success) throw new Error('Failed to Subscribe to page');
+
+    const longLivedPageToken = await getLongLivedPageAccessToken(request.query);
+
+    const facebook = await createFacebok({
+      formId: request.query.form_id,
+      pageId: request.query.page_id,
+      page_access_token: longLivedPageToken,
+    });
+    return reply.code(200).send(facebook);
+  } catch (error) {
+    logger.error(
+      error,
+      'createLeadgenSubscriptionHandler: error creating leadgen subscription'
+    );
+    return reply
+      .code(400)
+      .send({ message: 'Error creating leadgen subscription' });
   }
 }
 
