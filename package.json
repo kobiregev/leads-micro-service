@@ -11,6 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@fastify/cors": "^8.2.0",
     "@fastify/swagger": "^8.2.1",
     "@fastify/type-provider-json-schema-to-ts": "^2.2.1",
     "@sinclair/typebox": "^0.25.16",
