@@ -1,5 +1,11 @@
 import { config } from '../../utils/config';
-import { FacebookModel } from './facebook.model';
+import {
+  FacebookLead,
+  FacebookLeadModel,
+  FacebookSubscription,
+  FacebookSubscriptionModel,
+  FieldData,
+} from './facebook.model';
 
 export async function getUserPages({
   access_token,
@@ -50,26 +56,38 @@ export async function subscribePageToApp({
   throw data;
 }
 
-// Todo type out input
-export async function createFacebok(input: any) {
-  return FacebookModel.create(input);
+export async function createFacebookSubscription(input: FacebookSubscription) {
+  return FacebookSubscriptionModel.create(input);
+}
+
+export async function createFacebookLead(input: FacebookLead) {
+  return FacebookLeadModel.create(input);
 }
 
 export async function findFacebookLeadgenInfo({
-  formId,
-  pageId,
+  form_id,
+  page_id,
 }: {
-  formId: string;
-  pageId: string;
+  form_id: string;
+  page_id: string;
 }) {
-  return FacebookModel.findOne({ formId, pageId });
+  return FacebookSubscriptionModel.findOne({ form_id, page_id });
 }
+
+type leadDataResponse = {
+  created_time: string;
+  id: string;
+  ad_id: string;
+  form_id: string;
+  field_data: FieldData[];
+};
 
 export async function getFullLeadData(leadId: string, access_token: string) {
   const url = `https://graph.facebook.com/v15.0/${leadId}/?access_token=${access_token}`;
   const response = await fetch(url);
   const data = await response.json();
-  if (response.ok) return data;
+
+  if (response.ok) return data as leadDataResponse;
 
   throw data;
 }

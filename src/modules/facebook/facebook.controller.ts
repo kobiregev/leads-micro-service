@@ -1,6 +1,8 @@
+import { LogLevels } from '@typegoose/typegoose';
 import { FastifyReply } from 'fastify/types/reply';
 import { FastifyRequest } from 'fastify/types/request';
 import { logger } from '../../utils/logger';
+import { FieldData } from './facebook.model';
 import {
   CreateLeadgenSubscriptionQuery,
   GetNewLeadDataBody,
@@ -8,7 +10,8 @@ import {
   GetUserPagesQueryType,
 } from './facebook.schema';
 import {
-  createFacebok,
+  createFacebookLead,
+  createFacebookSubscription,
   findFacebookLeadgenInfo,
   getFullLeadData,
   getLongLivedPageAccessToken,
@@ -17,24 +20,32 @@ import {
   subscribePageToApp,
 } from './facebook.service';
 
-// Not Implemnted
 export async function getNewLeadDataHandler(
   request: FastifyRequest<{ Body: GetNewLeadDataBody }>,
   reply: FastifyReply
 ) {
   try {
-    const formId = request.body.entry[0].changes[0].value.form_id;
-    const pageId = request.body.entry[0].changes[0].value.page_id;
+    const form_id = request.body.entry[0].changes[0].value.form_id;
+    const page_id = request.body.entry[0].changes[0].value.page_id;
     const leadId = request.body.entry[0].changes[0].value.leadgen_id;
     // getFullLeadInfo
-    const leadInfo = await findFacebookLeadgenInfo({ formId, pageId });
+    const leadInfo = await findFacebookLeadgenInfo({ form_id, page_id });
+
     if (!leadInfo)
       return reply.code(400).send({
         message: "Error can't find lead with provided formId & pageId",
       });
 
-    const leadData = await getFullLeadData(leadId, leadInfo.page_access_token);
-    logger.info(leadData);
+    const { field_data, id, ...rest } = await getFullLeadData(
+      leadId,
+      leadInfo.page_access_token
+    );
+    const facebookLead = await createFacebookLead({
+      data: field_data,
+      lead_id: id,
+      ...rest,
+      form_id,
+    });
   } catch (error) {
     logger.error(error, 'getNewLeadDataHandler: error getting new lead');
     return reply.code(400).send({ message: 'Error getting new lead' });
@@ -44,7 +55,6 @@ export async function getNewLeadDataHandler(
 // get form id and page id
 // subscribe page to app
 // create facebook(formId,pageId)
-
 export async function createLeadgenSubscriptionHandler(
   request: FastifyRequest<{ Querystring: CreateLeadgenSubscriptionQuery }>,
   reply: FastifyReply
@@ -57,9 +67,8 @@ export async function createLeadgenSubscriptionHandler(
 
     const longLivedPageToken = await getLongLivedPageAccessToken(request.query);
 
-    const facebook = await createFacebok({
-      formId: request.query.form_id,
-      pageId: request.query.page_id,
+    const facebook = await createFacebookSubscription({
+      ...request.query,
       page_access_token: longLivedPageToken,
     });
     return reply.code(200).send(facebook);

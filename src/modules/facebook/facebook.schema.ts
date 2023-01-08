@@ -57,15 +57,17 @@ export type GetPageFormsQueryType = Static<typeof getPageFormsSchema.query>;
 // 1. require user_token,page_token and create a long lived page token and save it
 export const createLeadgenSubscriptionSchema = {
   tags: ['facebook'],
-  description: 'Create page to app subscription,and create faceboook model',
+  description: 'Create page to app subscription,and create facebook model',
   query: Type.Object({
     page_access_token: Type.String(),
     user_access_token: Type.String(),
     user_id: Type.String(),
     page_id: Type.String(),
+    page_name: Type.String(),
     form_id: Type.String(),
+    form_name: Type.String(),
   }),
-  //todo: change to a proper response
+  // TODO: change to a proper response
   response: {
     201: facebook,
   },
@@ -97,7 +99,7 @@ export const getNewLeadDataSchema = {
     ),
     object: Type.String(),
   }),
-  //todo: change to a proper response
+  //TODO: change to a proper response
 };
 
 export type GetNewLeadDataBody = Static<typeof getNewLeadDataSchema.body>;
