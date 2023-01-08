@@ -1,7 +1,7 @@
 version: '3.7'
 services:
-  lead-smicro-service:
-    container_name: lead-smicro-service
+  leads-micro-service:
+    container_name: leads-micro-service
     restart: unless-stopped
     environment:
       - NODE_ENV=production
