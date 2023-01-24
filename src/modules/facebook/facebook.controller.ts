@@ -1,8 +1,6 @@
-import { LogLevels } from '@typegoose/typegoose';
 import { FastifyReply } from 'fastify/types/reply';
 import { FastifyRequest } from 'fastify/types/request';
 import { logger } from '../../utils/logger';
-import { FieldData } from './facebook.model';
 import {
   CreateLeadgenSubscriptionQuery,
   GetNewLeadDataBody,

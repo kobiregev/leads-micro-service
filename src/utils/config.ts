@@ -12,6 +12,9 @@ const schema = Type.Object({
   DATABASE_URL: Type.String(),
   APP_SECRET: Type.String(),
   APP_ID: Type.String(),
+  LINKEDIN_CLIENT_SECRET: Type.String(),
+  LINKEDIN_CLIENT_ID: Type.String(),
+  LINKEDIN_REDIRECT_URI: Type.String(),
 });
 
 type Env = Static<typeof schema>;

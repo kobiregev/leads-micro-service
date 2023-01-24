@@ -3,6 +3,7 @@ import cors from '@fastify/cors';
 import swagger from '@fastify/swagger';
 import { facebookRoute } from '../modules/facebook/facebook.route';
 import { version } from '../../package.json';
+import { linkedinRoute } from '../modules/linkedin/linkedin.route';
 export async function createServer() {
   const app = fastify();
 
@@ -26,6 +27,7 @@ export async function createServer() {
   // });
 
   app.register(facebookRoute, { prefix: '/api/facebook' });
+  app.register(linkedinRoute, { prefix: '/api/linkedin' });
 
   return app;
 }
