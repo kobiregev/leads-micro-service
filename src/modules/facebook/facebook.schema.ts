@@ -67,13 +67,28 @@ export const createLeadgenSubscriptionSchema = {
     form_id: Type.String(),
     form_name: Type.String(),
   }),
+  body: Type.Object({
+    questions: Type.Array(
+      Type.Object({
+        key: Type.Optional(Type.String()),
+        predefinedField: Type.String(),
+      })
+    ),
+    dolphin_access_token: Type.String(),
+    campaignId: Type.String(),
+    companyId: Type.String(),
+  }),
   // TODO: change to a proper response
   response: {
     201: facebook,
   },
 };
+
 export type CreateLeadgenSubscriptionQuery = Static<
   typeof createLeadgenSubscriptionSchema.query
+>;
+export type CreateLeadgenSubscriptionBody = Static<
+  typeof createLeadgenSubscriptionSchema.body
 >;
 
 export const getNewLeadDataSchema = {
@@ -103,3 +118,29 @@ export const getNewLeadDataSchema = {
 };
 
 export type GetNewLeadDataBody = Static<typeof getNewLeadDataSchema.body>;
+
+export const getFormQuestionsSchema = {
+  tags: ['facebook'],
+  description: 'Get form questions',
+  query: Type.Object({
+    form_id: Type.String(),
+    page_access_token: Type.String(),
+  }),
+};
+export type GetFormQuestionsQuery = Static<typeof getFormQuestionsSchema.query>;
+
+export const webhookChallengeSchema = {
+  tags: ['facebook'],
+  description: 'facebook security challenge',
+  query: Type.Object({
+    'hub.verify_token': Type.String(),
+    'hub.challenge': Type.String(),
+  }),
+};
+export type WebhookChallengeQuery = Static<typeof webhookChallengeSchema.query>;
+/*
+interface IChallengeQueryString {
+//   'hub.verify_token': string;
+//   'hub.challenge': string;
+// }
+*/

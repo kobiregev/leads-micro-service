@@ -2,6 +2,7 @@ import { config } from '../../utils/config';
 import {
   FacebookLead,
   FacebookLeadModel,
+  FacebookQuestion,
   FacebookSubscription,
   FacebookSubscriptionModel,
   FieldData,
@@ -126,4 +127,89 @@ export async function getLongLivedPageAccessToken({
   if (response.ok) return data.data[0].access_token;
 
   throw data;
+}
+
+// TODO: Get form questions
+
+type getFormQuestionsArgs = {
+  page_access_token: string;
+  form_id: string;
+};
+export async function getFormQuestions({
+  form_id,
+  page_access_token,
+}: getFormQuestionsArgs) {
+  try {
+    const url = `https://graph.facebook.com/v15.0/${form_id}?fields=questions&access_token=${page_access_token}`;
+    const response = await fetch(url);
+
+    if (!response.ok) throw await response.text();
+
+    const data = await response.json();
+
+    return [data.questions, null];
+  } catch (error) {
+    return [null, error];
+  }
+}
+
+type GetDolphinCampaignQuestionsArgs = {
+  dolphin_access_token: string;
+  campaignId: string;
+};
+
+type DolphinQuestion = {
+  predefinedField: string;
+  fieldName: string;
+};
+export async function getDolphinCampaignQuestions({
+  campaignId,
+  dolphin_access_token,
+}: GetDolphinCampaignQuestionsArgs): Promise<[DolphinQuestion[] | null, any?]> {
+  try {
+    const url = `https://adsil1.com/leadsapi/api/campaigns/getCampaignFields/${dolphin_access_token}/${campaignId}`;
+    const response = await fetch(url);
+
+    if (!response.ok) throw await response.text();
+
+    const data = await response.json();
+    return [data.data, null];
+  } catch (error) {
+    return [null, error];
+  }
+}
+
+export function convertArrayToObject(
+  data: FacebookQuestion[],
+  fieldArray: FieldData[]
+): { [key: string]: string } {
+  return data.reduce((acc, question) => {
+    const field = fieldArray.find((data) => data.name === question.key);
+    if (!field || !field.values?.length) return { '': '' };
+    acc[`${question.predefinedField}`] = field.values[0];
+    return acc;
+  }, {} as { [key: string]: string });
+}
+type SendLeadToDolphinArgs = {
+  body: Record<string, string>;
+};
+
+export async function sendLeadToDolphin({ body }: SendLeadToDolphinArgs) {
+  try {
+    const url = 'https://adsil1.com/LeadsAPI/api/leads';
+    const response = await fetch(url, {
+      method: 'POST',
+      body: JSON.stringify(body),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) throw await response.text();
+
+    const data = await response.json();
+    return [data, null];
+  } catch (error) {
+    return [null, error];
+  }
 }

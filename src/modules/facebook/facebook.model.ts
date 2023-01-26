@@ -1,5 +1,15 @@
 import { prop, getModelForClass } from '@typegoose/typegoose';
 
+export class FacebookQuestion {
+  //This is how facebook calls the field When receiving the lead data "name" maps to the field name
+  @prop({ type: String, required: true })
+  key?: string;
+
+  // This is the name that should be sent to dolphin leads
+  @prop({ type: String, required: true })
+  predefinedField: string;
+}
+
 export class FacebookSubscription {
   @prop({ type: String, required: true })
   page_id: string;
@@ -10,11 +20,20 @@ export class FacebookSubscription {
   @prop({ type: String, required: true, unique: true })
   form_id: string;
 
-  @prop({ type: String, required: true, unique: true })
+  @prop({ type: String, required: true })
   form_name: string;
 
   @prop({ type: String, required: true })
   page_access_token: string;
+
+  @prop({ type: String, required: true })
+  companyId: string;
+
+  @prop({ type: String, required: true })
+  campaignId: string;
+
+  @prop({ type: Array<FacebookQuestion>, required: true, _id: false })
+  questions: FacebookQuestion[];
 }
 
 export const FacebookSubscriptionModel = getModelForClass(
