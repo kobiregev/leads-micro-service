@@ -1,6 +1,7 @@
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import {
   createLeadgenSubscriptionHandler,
+  getFormQuestionsHandler,
   getNewLeadDataHandler,
   getPageFormsHandler,
   getUserPagesHandler,
@@ -8,6 +9,7 @@ import {
 } from './facebook.controller';
 import {
   createLeadgenSubscriptionSchema,
+  getFormQuestionsSchema,
   getNewLeadDataSchema,
   getPageFormsSchema,
   getUserPagesSchema,
@@ -22,10 +24,15 @@ export function facebookRoute(
   app.post('/webhook', { schema: getNewLeadDataSchema }, getNewLeadDataHandler);
   app.get('/pages', { schema: getUserPagesSchema }, getUserPagesHandler);
   app.get('/forms', { schema: getPageFormsSchema }, getPageFormsHandler);
-  app.get(
+  app.post(
     '/subscribe',
     { schema: createLeadgenSubscriptionSchema },
     createLeadgenSubscriptionHandler
+  );
+  app.get(
+    '/questions',
+    { schema: getFormQuestionsSchema },
+    getFormQuestionsHandler
   );
   done();
 }
