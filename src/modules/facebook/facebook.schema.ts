@@ -138,9 +138,16 @@ export const webhookChallengeSchema = {
   }),
 };
 export type WebhookChallengeQuery = Static<typeof webhookChallengeSchema.query>;
-/*
-interface IChallengeQueryString {
-//   'hub.verify_token': string;
-//   'hub.challenge': string;
-// }
-*/
+
+export const deleteLeadgenSubscriptionSchema = {
+  tags: ['facebook'],
+  description: 'Delete facebook leadgen subscription',
+  body: Type.Object({
+    form_id: Type.String(),
+    companyId: Type.String(),
+    dolphin_access_token: Type.String(),
+  }),
+};
+export type DeleteLeadgenSubscriptionBody = Static<
+  typeof deleteLeadgenSubscriptionSchema.body
+>;

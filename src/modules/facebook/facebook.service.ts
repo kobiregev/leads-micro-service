@@ -213,3 +213,36 @@ export async function sendLeadToDolphin({ body }: SendLeadToDolphinArgs) {
     return [null, error];
   }
 }
+
+type FindAndDeleteSubscription = {
+  form_id: string;
+  companyId: string;
+};
+export async function findAndDeleteSubscription({
+  form_id,
+  companyId,
+}: FindAndDeleteSubscription) {
+  return FacebookSubscriptionModel.findOneAndDelete({ form_id, companyId });
+}
+
+export async function deleteSubscriptionFromFacebook({
+  page_id,
+  page_access_token,
+}: {
+  page_id: string;
+  page_access_token: string;
+}) {
+  try {
+    const url = `https://graph.facebook.com/v15.0/${page_id}/subscribed_apps?subscribed_fields=leadgen&access_token=${page_access_token}`;
+    const response = await fetch(url, {
+      method: 'DELETE',
+    });
+
+    if (!response.ok) throw await response.text();
+
+    const data = await response.json();
+    return [data, null];
+  } catch (error) {
+    return [null, error];
+  }
+}

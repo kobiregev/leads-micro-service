@@ -5,10 +5,12 @@ import {
   getNewLeadDataHandler,
   getPageFormsHandler,
   getUserPagesHandler,
+  handleDeleteLeadgenSubscription,
   webhookChallengeHandler,
 } from './facebook.controller';
 import {
   createLeadgenSubscriptionSchema,
+  deleteLeadgenSubscriptionSchema,
   getFormQuestionsSchema,
   getNewLeadDataSchema,
   getPageFormsSchema,
@@ -24,15 +26,23 @@ export function facebookRoute(
   app.post('/webhook', { schema: getNewLeadDataSchema }, getNewLeadDataHandler);
   app.get('/pages', { schema: getUserPagesSchema }, getUserPagesHandler);
   app.get('/forms', { schema: getPageFormsSchema }, getPageFormsHandler);
+
   app.post(
     '/subscribe',
     { schema: createLeadgenSubscriptionSchema },
     createLeadgenSubscriptionHandler
   );
+
   app.get(
     '/questions',
     { schema: getFormQuestionsSchema },
     getFormQuestionsHandler
+  );
+
+  app.delete(
+    '/subscription',
+    { schema: deleteLeadgenSubscriptionSchema },
+    handleDeleteLeadgenSubscription
   );
   done();
 }

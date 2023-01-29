@@ -1,3 +1,4 @@
+import { log } from 'console';
 import { FastifyReply } from 'fastify/types/reply';
 import { FastifyRequest } from 'fastify/types/request';
 import { StatusCodes } from 'http-status-codes';
@@ -5,6 +6,7 @@ import { logger } from '../../utils/logger';
 import {
   CreateLeadgenSubscriptionBody,
   CreateLeadgenSubscriptionQuery,
+  DeleteLeadgenSubscriptionBody,
   GetFormQuestionsQuery,
   GetNewLeadDataBody,
   GetPageFormsQueryType,
@@ -15,6 +17,8 @@ import {
   convertArrayToObject,
   createFacebookLead,
   createFacebookSubscription,
+  deleteSubscriptionFromFacebook,
+  findAndDeleteSubscription,
   findFacebookLeadgenInfo,
   getDolphinCampaignQuestions,
   getFormQuestions,
@@ -190,5 +194,46 @@ export async function getFormQuestionsHandler(
   } catch (error) {
     logger.error(error, 'getFormQuestionsHandler: error getting page forms');
     return reply.code(400).send({ message: 'Error getting form questions' });
+  }
+}
+
+export async function handleDeleteLeadgenSubscription(
+  request: FastifyRequest<{ Body: DeleteLeadgenSubscriptionBody }>,
+  reply: FastifyReply
+) {
+  try {
+    const { companyId, form_id, dolphin_access_token } = request.body;
+    // TODO: Verify user permission
+
+    // TODO: Find and delete relevant document from database
+    const deletedSubscription = await findAndDeleteSubscription({
+      companyId,
+      form_id,
+    });
+    if (!deletedSubscription) {
+      return reply
+        .code(StatusCodes.BAD_REQUEST)
+        .send("Couldn't find subscription");
+    }
+
+    // TODO: Delete subscription from facebook api
+    const [data, error] = await deleteSubscriptionFromFacebook({
+      page_access_token: deletedSubscription.page_access_token,
+      page_id: deletedSubscription.page_id,
+    });
+    console.log({ data, error });
+    if (error) {
+      return reply
+        .code(StatusCodes.BAD_REQUEST)
+        .send("Couldn't delete from facebook-api");
+    }
+
+    return reply.code(StatusCodes.OK).send('Deleted successfully');
+  } catch (error) {
+    logger.error(
+      error,
+      'deleteSubscriptionFromFacebook: error deleting subscription'
+    );
+    return reply.code(500).send({ message: 'Error deleting subscription' });
   }
 }
