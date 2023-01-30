@@ -1,6 +1,7 @@
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import {
   createLeadgenSubscriptionHandler,
+  editLeadgenSubscriptionHandler,
   getFormQuestionsHandler,
   getNewLeadDataHandler,
   getPageFormsHandler,
@@ -11,6 +12,7 @@ import {
 import {
   createLeadgenSubscriptionSchema,
   deleteLeadgenSubscriptionSchema,
+  editLeadgenSubscriptionSchema,
   getFormQuestionsSchema,
   getNewLeadDataSchema,
   getPageFormsSchema,
@@ -43,6 +45,12 @@ export function facebookRoute(
     '/subscription',
     { schema: deleteLeadgenSubscriptionSchema },
     handleDeleteLeadgenSubscription
+  );
+
+  app.put(
+    '/subscription',
+    { schema: editLeadgenSubscriptionSchema },
+    editLeadgenSubscriptionHandler
   );
   done();
 }

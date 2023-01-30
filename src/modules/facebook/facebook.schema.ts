@@ -93,7 +93,7 @@ export type CreateLeadgenSubscriptionBody = Static<
 
 export const getNewLeadDataSchema = {
   tags: ['facebook'],
-  description: 'Recive new leadgen via facebook webhook',
+  description: 'Receive new leadgen via facebook webhook',
   body: Type.Object({
     entry: Type.Array(
       Type.Object({
@@ -150,4 +150,24 @@ export const deleteLeadgenSubscriptionSchema = {
 };
 export type DeleteLeadgenSubscriptionBody = Static<
   typeof deleteLeadgenSubscriptionSchema.body
+>;
+
+export const editLeadgenSubscriptionSchema = {
+  tags: ['facebook'],
+  description: 'Edit facebook leadgen subscription',
+  body: Type.Object({
+    form_id: Type.String(),
+    companyId: Type.String(),
+    dolphin_access_token: Type.String(),
+    questions: Type.Array(
+      Type.Object({
+        key: Type.Optional(Type.String()),
+        predefinedField: Type.String(),
+      })
+    ),
+  }),
+};
+
+export type EditLeadgenSubscriptionBody = Static<
+  typeof editLeadgenSubscriptionSchema.body
 >;

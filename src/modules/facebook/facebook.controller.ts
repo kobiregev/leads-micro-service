@@ -7,6 +7,7 @@ import {
   CreateLeadgenSubscriptionBody,
   CreateLeadgenSubscriptionQuery,
   DeleteLeadgenSubscriptionBody,
+  EditLeadgenSubscriptionBody,
   GetFormQuestionsQuery,
   GetNewLeadDataBody,
   GetPageFormsQueryType,
@@ -19,6 +20,7 @@ import {
   createFacebookSubscription,
   deleteSubscriptionFromFacebook,
   findAndDeleteSubscription,
+  findAndUpdateSubscriptionQuestions,
   findFacebookLeadgenInfo,
   getDolphinCampaignQuestions,
   getFormQuestions,
@@ -235,5 +237,38 @@ export async function handleDeleteLeadgenSubscription(
       'deleteSubscriptionFromFacebook: error deleting subscription'
     );
     return reply.code(500).send({ message: 'Error deleting subscription' });
+  }
+}
+
+export async function editLeadgenSubscriptionHandler(
+  request: FastifyRequest<{ Body: EditLeadgenSubscriptionBody }>,
+  reply: FastifyReply
+) {
+  try {
+    const { form_id, companyId, dolphin_access_token, questions } =
+      request.body;
+    // TODO verify user permission
+
+    // TODO edit relevant document
+    const result = await findAndUpdateSubscriptionQuestions(
+      form_id,
+      companyId,
+      questions
+    );
+    console.log(result);
+
+    if (!result) {
+      return reply
+        .code(StatusCodes.BAD_REQUEST)
+        .send("Couldn't update subscription");
+    }
+
+    return reply.code(StatusCodes.OK).send('Updated successfully');
+  } catch (error) {
+    logger.error(
+      error,
+      'editLeadgenSubscriptionHandler: error updating subscription'
+    );
+    return reply.code(500).send({ message: 'Error updating subscription' });
   }
 }

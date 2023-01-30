@@ -246,3 +246,30 @@ export async function deleteSubscriptionFromFacebook({
     return [null, error];
   }
 }
+
+export async function findAndUpdateSubscriptionQuestions(
+  form_id: string,
+  companyId: string,
+  update: FacebookQuestion[]
+) {
+  const subscription = await FacebookSubscriptionModel.findOne({
+    form_id,
+    companyId,
+  });
+
+  if (!subscription) {
+    return;
+  }
+
+  subscription.questions = subscription.questions.map((q) => {
+    const questionToUpdate = update.find(
+      (question) => question.predefinedField === q.predefinedField
+    );
+
+    if (!questionToUpdate) return q;
+
+    return questionToUpdate;
+  });
+  await subscription.save();
+  return subscription;
+}
