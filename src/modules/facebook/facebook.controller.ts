@@ -1,4 +1,3 @@
-import { log } from 'console';
 import { FastifyReply } from 'fastify/types/reply';
 import { FastifyRequest } from 'fastify/types/request';
 import { StatusCodes } from 'http-status-codes';
@@ -11,6 +10,7 @@ import {
   GetFormQuestionsQuery,
   GetNewLeadDataBody,
   GetPageFormsQueryType,
+  GetSubscriptionQuery,
   GetUserPagesQueryType,
   WebhookChallengeQuery,
 } from './facebook.schema';
@@ -22,6 +22,7 @@ import {
   findAndDeleteSubscription,
   findAndUpdateSubscriptionQuestions,
   findFacebookLeadgenInfo,
+  findSubscription,
   getDolphinCampaignQuestions,
   getFormQuestions,
   getFullLeadData,
@@ -270,5 +271,31 @@ export async function editLeadgenSubscriptionHandler(
       'editLeadgenSubscriptionHandler: error updating subscription'
     );
     return reply.code(500).send({ message: 'Error updating subscription' });
+  }
+}
+
+export async function getSubscriptionHandler(
+  request: FastifyRequest<{ Querystring: GetSubscriptionQuery }>,
+  reply: FastifyReply
+) {
+  try {
+    const { companyId, form_id, dolphin_access_token } = request.query;
+    // TODO verify user permissions
+
+    //  search for subscription
+    const subscription = await findSubscription(form_id, companyId);
+    if (!subscription)
+      return reply
+        .code(StatusCodes.BAD_REQUEST)
+        .send("Couldn't find subscription");
+
+    //  send back to the user
+    return reply.code(StatusCodes.OK).send(subscription);
+  } catch (error) {
+    logger.error(
+      error,
+      'editLeadgenSubscriptionHandler: error getting subscription'
+    );
+    return reply.code(500).send({ message: 'Error getting subscription' });
   }
 }

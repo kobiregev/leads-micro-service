@@ -273,3 +273,7 @@ export async function findAndUpdateSubscriptionQuestions(
   await subscription.save();
   return subscription;
 }
+
+export async function findSubscription(form_id: string, companyId: string) {
+  return FacebookSubscriptionModel.findOne({ form_id, companyId });
+}

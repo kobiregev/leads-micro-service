@@ -5,6 +5,7 @@ import {
   getFormQuestionsHandler,
   getNewLeadDataHandler,
   getPageFormsHandler,
+  getSubscriptionHandler,
   getUserPagesHandler,
   handleDeleteLeadgenSubscription,
   webhookChallengeHandler,
@@ -16,6 +17,7 @@ import {
   getFormQuestionsSchema,
   getNewLeadDataSchema,
   getPageFormsSchema,
+  getSubscriptionSchema,
   getUserPagesSchema,
 } from './facebook.schema';
 
@@ -51,6 +53,12 @@ export function facebookRoute(
     '/subscription',
     { schema: editLeadgenSubscriptionSchema },
     editLeadgenSubscriptionHandler
+  );
+
+  app.get(
+    '/subscription',
+    { schema: getSubscriptionSchema },
+    getSubscriptionHandler
   );
   done();
 }

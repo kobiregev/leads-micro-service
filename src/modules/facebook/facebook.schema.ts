@@ -171,3 +171,13 @@ export const editLeadgenSubscriptionSchema = {
 export type EditLeadgenSubscriptionBody = Static<
   typeof editLeadgenSubscriptionSchema.body
 >;
+export const getSubscriptionSchema = {
+  tags: ['facebook'],
+  description: 'get facebook leadgen subscription',
+  query: Type.Object({
+    form_id: Type.String(),
+    companyId: Type.String(),
+    dolphin_access_token: Type.String(),
+  }),
+};
+export type GetSubscriptionQuery = Static<typeof getSubscriptionSchema.query>;
