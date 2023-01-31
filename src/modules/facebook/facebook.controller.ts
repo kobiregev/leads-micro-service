@@ -31,6 +31,7 @@ import {
   getUserPages,
   sendLeadToDolphin,
   subscribePageToApp,
+  verifyDolphinPermissions,
 } from './facebook.service';
 
 export async function getNewLeadDataHandler(
@@ -89,7 +90,7 @@ export async function createLeadgenSubscriptionHandler(
   reply: FastifyReply
 ) {
   try {
-    // TODO get the campaign questions,
+    //  get the campaign questions,
     const [dolphinQuestions, error] = await getDolphinCampaignQuestions(
       request.body
     );
@@ -206,9 +207,18 @@ export async function handleDeleteLeadgenSubscription(
 ) {
   try {
     const { companyId, form_id, dolphin_access_token } = request.body;
-    // TODO: Verify user permission
+    //  Verify user permission
+    const [data, error] = await verifyDolphinPermissions(
+      dolphin_access_token,
+      companyId
+    );
 
-    // TODO: Find and delete relevant document from database
+    if (error || data?.level !== 1) {
+      return reply
+        .code(StatusCodes.UNAUTHORIZED)
+        .send("You doesn't meet the required permissions");
+    }
+    // Find and delete relevant document from database
     const deletedSubscription = await findAndDeleteSubscription({
       companyId,
       form_id,
@@ -219,13 +229,12 @@ export async function handleDeleteLeadgenSubscription(
         .send("Couldn't find subscription");
     }
 
-    // TODO: Delete subscription from facebook api
-    const [data, error] = await deleteSubscriptionFromFacebook({
+    //  Delete subscription from facebook api
+    const [data2, error2] = await deleteSubscriptionFromFacebook({
       page_access_token: deletedSubscription.page_access_token,
       page_id: deletedSubscription.page_id,
     });
-    console.log({ data, error });
-    if (error) {
+    if (error2) {
       return reply
         .code(StatusCodes.BAD_REQUEST)
         .send("Couldn't delete from facebook-api");
@@ -248,15 +257,23 @@ export async function editLeadgenSubscriptionHandler(
   try {
     const { form_id, companyId, dolphin_access_token, questions } =
       request.body;
-    // TODO verify user permission
+    //  verify user permission
+    const [data, error] = await verifyDolphinPermissions(
+      dolphin_access_token,
+      companyId
+    );
 
-    // TODO edit relevant document
+    if (error || data?.level !== 1) {
+      return reply
+        .code(StatusCodes.UNAUTHORIZED)
+        .send("You doesn't meet the required permissions");
+    }
+    //  edit relevant document
     const result = await findAndUpdateSubscriptionQuestions(
       form_id,
       companyId,
       questions
     );
-    console.log(result);
 
     if (!result) {
       return reply
@@ -280,8 +297,17 @@ export async function getSubscriptionHandler(
 ) {
   try {
     const { companyId, form_id, dolphin_access_token } = request.query;
-    // TODO verify user permissions
+    //  verify user permissions
+    const [data, error] = await verifyDolphinPermissions(
+      dolphin_access_token,
+      companyId
+    );
 
+    if (error || data?.level !== 1) {
+      return reply
+        .code(StatusCodes.UNAUTHORIZED)
+        .send("You doesn't meet the required permissions");
+    }
     //  search for subscription
     const subscription = await findSubscription(form_id, companyId);
     if (!subscription)

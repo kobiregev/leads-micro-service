@@ -277,3 +277,21 @@ export async function findAndUpdateSubscriptionQuestions(
 export async function findSubscription(form_id: string, companyId: string) {
   return FacebookSubscriptionModel.findOne({ form_id, companyId });
 }
+
+export async function verifyDolphinPermissions(
+  token: string,
+  companyId: string
+) {
+  try {
+    const url = `https://adsil1.com/LeadsAPI/api/AccessToken/getToken/${companyId}/${token}`;
+    const response = await fetch(url);
+
+    if (!response.ok) throw await response.text();
+
+    const data = await response.json();
+
+    return [data.data, null];
+  } catch (error) {
+    return [null, error];
+  }
+}
