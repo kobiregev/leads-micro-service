@@ -11,6 +11,7 @@ import {
   GetNewLeadDataBody,
   GetPageFormsQueryType,
   GetSubscriptionQuery,
+  GetSubscriptionsQuery,
   GetUserPagesQueryType,
   WebhookChallengeQuery,
 } from './facebook.schema';
@@ -19,6 +20,7 @@ import {
   createFacebookLead,
   createFacebookSubscription,
   deleteSubscriptionFromFacebook,
+  findAlSubscriptionsByCompanyId,
   findAndDeleteSubscription,
   findAndUpdateSubscriptionQuestions,
   findFacebookLeadgenInfo,
@@ -323,5 +325,29 @@ export async function getSubscriptionHandler(
       'editLeadgenSubscriptionHandler: error getting subscription'
     );
     return reply.code(500).send({ message: 'Error getting subscription' });
+  }
+}
+
+export async function getSubscriptionsHandler(
+  request: FastifyRequest<{ Querystring: GetSubscriptionsQuery }>,
+  reply: FastifyReply
+) {
+  try {
+    // TODO Maybe Auth
+
+    //  get all subscriptions relevant to the companyId
+    const subscriptions = await findAlSubscriptionsByCompanyId(
+      request.query.companyId
+    );
+    if (!subscriptions.length) {
+      return reply
+        .code(StatusCodes.BAD_REQUEST)
+        .send("Couldn't find subscriptions");
+    }
+
+    return reply.code(StatusCodes.OK).send(subscriptions);
+  } catch (error) {
+    logger.error(error, 'getSubscriptionsHandler: error getting subscriptions');
+    return reply.code(500).send({ message: 'Error getting subscriptions' });
   }
 }

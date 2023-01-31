@@ -299,3 +299,9 @@ export async function verifyDolphinPermissions(
     return [null, error];
   }
 }
+
+export async function findAlSubscriptionsByCompanyId(companyId: string) {
+  return FacebookSubscriptionModel.find({ companyId }).select(
+    '-page_access_token -questions'
+  );
+}

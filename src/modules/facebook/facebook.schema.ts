@@ -181,3 +181,13 @@ export const getSubscriptionSchema = {
   }),
 };
 export type GetSubscriptionQuery = Static<typeof getSubscriptionSchema.query>;
+
+export const getSubscriptionsSchema = {
+  tags: ['facebook'],
+  description: 'get facebook leadgen subscriptions',
+  query: Type.Object({
+    companyId: Type.String(),
+    dolphin_access_token: Type.Optional(Type.String()),
+  }),
+};
+export type GetSubscriptionsQuery = Static<typeof getSubscriptionsSchema.query>;
