@@ -183,10 +183,14 @@ export function convertArrayToObject(
   data: FacebookQuestion[],
   fieldArray: FieldData[]
 ): { [key: string]: string } {
-  return data.reduce((acc, question) => {
+  const filteredData = data.filter((d) => !!d.key);
+  return filteredData.reduce((acc, question) => {
     const field = fieldArray.find((data) => data.name === question.key);
+
     if (!field || !field.values?.length) return { '': '' };
+
     acc[`${question.predefinedField}`] = field.values[0];
+
     return acc;
   }, {} as { [key: string]: string });
 }
