@@ -26,7 +26,7 @@ export class FacebookSubscription {
   @prop({ type: String, required: true })
   page_access_token: string;
 
-  @prop({ type: String, required: true })
+  @prop({ type: String, lowercase: true, required: true })
   companyId: string;
 
   @prop({ type: String, required: true })
