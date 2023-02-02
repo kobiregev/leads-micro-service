@@ -347,8 +347,6 @@ export async function getSubscriptionsHandler(
     const subscriptions = await findAlSubscriptionsByCompanyId(
       request.query.companyId
     );
-    console.log(subscriptions);
-
     if (!subscriptions.length) {
       return reply
         .code(StatusCodes.BAD_REQUEST)
