@@ -133,11 +133,19 @@ export async function createLeadgenSubscriptionHandler(
     });
 
     return reply.code(200).send(facebook);
-  } catch (error) {
+  } catch (error: any) {
+    if (error.code === 11000) {
+      return reply.code(StatusCodes.BAD_REQUEST).send({
+        code: 1100,
+        message: 'This Facebook form is already connected',
+      });
+    }
+
     logger.error(
       error,
       'createLeadgenSubscriptionHandler: error creating leadgen subscription'
     );
+
     return reply
       .code(400)
       .send({ message: 'Error creating leadgen subscription', error });
@@ -339,6 +347,8 @@ export async function getSubscriptionsHandler(
     const subscriptions = await findAlSubscriptionsByCompanyId(
       request.query.companyId
     );
+    console.log(subscriptions);
+
     if (!subscriptions.length) {
       return reply
         .code(StatusCodes.BAD_REQUEST)
