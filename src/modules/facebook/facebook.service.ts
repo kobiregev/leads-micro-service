@@ -142,13 +142,14 @@ export async function getFormQuestions({
   try {
     const url = `https://graph.facebook.com/v15.0/${form_id}?fields=questions&access_token=${page_access_token}`;
     const response = await fetch(url);
-
+    console.log();
     if (!response.ok) throw await response.text();
 
     const data = await response.json();
 
     return [data.questions, null];
   } catch (error) {
+    console.log(error);
     return [null, error];
   }
 }
@@ -277,9 +278,22 @@ export async function findAndUpdateSubscriptionQuestions(
   await subscription.save();
   return subscription;
 }
+export async function updateSubscriptionsPageAccessToken(
+  token: string,
+  page_id: string
+) {
+  await FacebookSubscriptionModel.updateMany(
+    { page_id },
+    { $set: { page_access_token: token } }
+  );
+}
 
 export async function findSubscription(form_id: string, companyId: string) {
   return FacebookSubscriptionModel.findOne({ form_id, companyId });
+}
+export async function findSubscriptionByPageId(page_id: string) {
+  if (!page_id) return null;
+  return FacebookSubscriptionModel.find({ page_id });
 }
 
 export async function verifyDolphinPermissions(
@@ -289,12 +303,10 @@ export async function verifyDolphinPermissions(
   try {
     const url = `https://adsil1.com/LeadsAPI/api/AccessToken/getToken/${companyId}/${token}`;
     const response = await fetch(url);
-
     if (!response.ok) throw await response.text();
-
     const data = await response.json();
 
-    return [data.data, null];
+    return [data.data || data, null];
   } catch (error) {
     return [null, error];
   }

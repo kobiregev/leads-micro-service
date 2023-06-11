@@ -54,6 +54,16 @@ export const getPageFormsSchema = {
 
 export type GetPageFormsQueryType = Static<typeof getPageFormsSchema.query>;
 
+export const RefreshPageLongLivedAccessTokenSchema = {
+  tags: ['facebook'],
+  description: 'Refresh the subscription page access token',
+  body: Type.Object({
+    access_token: Type.String(),
+    user_id: Type.String(),
+    page_id: Type.String(),
+  }),
+};
+
 // 1. require user_token,page_token and create a long lived page token and save it
 export const createLeadgenSubscriptionSchema = {
   tags: ['facebook'],
@@ -90,7 +100,9 @@ export type CreateLeadgenSubscriptionQuery = Static<
 export type CreateLeadgenSubscriptionBody = Static<
   typeof createLeadgenSubscriptionSchema.body
 >;
-
+export type RefreshPageLongLivedAccessTokenBody = Static<
+  typeof RefreshPageLongLivedAccessTokenSchema.body
+>;
 export const getNewLeadDataSchema = {
   tags: ['facebook'],
   description: 'Receive new leadgen via facebook webhook',

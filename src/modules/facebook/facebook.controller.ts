@@ -13,6 +13,7 @@ import {
   GetSubscriptionQuery,
   GetSubscriptionsQuery,
   GetUserPagesQueryType,
+  RefreshPageLongLivedAccessTokenBody,
   WebhookChallengeQuery,
 } from './facebook.schema';
 import {
@@ -25,6 +26,7 @@ import {
   findAndUpdateSubscriptionQuestions,
   findFacebookLeadgenInfo,
   findSubscription,
+  findSubscriptionByPageId,
   getDolphinCampaignQuestions,
   getFormQuestions,
   getFullLeadData,
@@ -33,6 +35,7 @@ import {
   getUserPages,
   sendLeadToDolphin,
   subscribePageToApp,
+  updateSubscriptionsPageAccessToken,
   verifyDolphinPermissions,
 } from './facebook.service';
 
@@ -82,6 +85,31 @@ export async function getNewLeadDataHandler(
     logger.error(error, 'getNewLeadDataHandler: error getting new lead');
     return reply.code(400).send({ message: 'Error getting new lead' });
   }
+}
+/*
+Todo 
+  Refresh long live token
+*/
+export async function refreshPageLongLivedAccessToken(
+  request: FastifyRequest<{ Body: RefreshPageLongLivedAccessTokenBody }>,
+  reply: FastifyReply
+) {
+  const { access_token, page_id, user_id } = request.body;
+  // TODO: validate that the page is belong to that user to do that will get the user pages and see if the requested page_id is included there
+  const pages = await getUserPages(request.body);
+
+  const page = pages?.data?.find((page: any) => page?.id === page_id);
+
+  if (!(pages.data.length > 0) || !page) {
+    return reply.code(StatusCodes.UNAUTHORIZED);
+  }
+  const longLivedPageToken = await getLongLivedPageAccessToken({
+    user_access_token: access_token,
+    user_id,
+  });
+  await updateSubscriptionsPageAccessToken(longLivedPageToken, page_id);
+
+  // TODO: update all the subscriptions related to that page access token
 }
 
 export async function createLeadgenSubscriptionHandler(
@@ -222,7 +250,8 @@ export async function handleDeleteLeadgenSubscription(
       dolphin_access_token,
       companyId
     );
-
+    console.log(data);
+    console.log(error);
     if (error || data?.level !== 1) {
       return reply
         .code(StatusCodes.UNAUTHORIZED)
@@ -239,15 +268,26 @@ export async function handleDeleteLeadgenSubscription(
         .send("Couldn't find subscription");
     }
 
-    //  Delete subscription from facebook api
-    const [data2, error2] = await deleteSubscriptionFromFacebook({
-      page_access_token: deletedSubscription.page_access_token,
-      page_id: deletedSubscription.page_id,
-    });
-    if (error2) {
-      return reply
-        .code(StatusCodes.BAD_REQUEST)
-        .send("Couldn't delete from facebook-api");
+    const subscriptions = await findSubscriptionByPageId(
+      deletedSubscription.page_id
+    );
+    console.log('Subscriptions: ', subscriptions?.length);
+
+    if (subscriptions?.length === 0) {
+      console.log('No more subscriptions deleting webhook...');
+      //  Delete subscription from facebook api
+      const [data2, error2] = await deleteSubscriptionFromFacebook({
+        page_access_token: deletedSubscription.page_access_token,
+        page_id: deletedSubscription.page_id,
+      });
+      console.log('delete from facebook');
+      console.log(data2);
+
+      if (error2) {
+        return reply
+          .code(StatusCodes.BAD_REQUEST)
+          .send("Couldn't delete from facebook-api");
+      }
     }
 
     return reply.code(StatusCodes.OK).send('Deleted successfully');
@@ -272,7 +312,7 @@ export async function editLeadgenSubscriptionHandler(
       dolphin_access_token,
       companyId
     );
-
+    console.log({ data, error });
     if (error || data?.level !== 1) {
       return reply
         .code(StatusCodes.UNAUTHORIZED)

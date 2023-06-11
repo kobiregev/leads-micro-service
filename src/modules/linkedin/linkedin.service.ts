@@ -25,12 +25,13 @@ export async function getAuthToken(access_code: string) {
       method: 'POST',
       body,
     });
+
     if (!response.ok) {
       throw await response.text;
     }
     const data = await response.json();
     return [data, null];
-  } catch (error) {
+  } catch (error: any) {
     return [null, error];
   }
 }
@@ -135,8 +136,11 @@ export async function createLeadNotificationURL({
         sponsoredEntity,
       },
       status: 'ACTIVE',
-      url: 'https://6012-2a0d-6fc0-84f0-1a00-4c4f-2aa9-ffc3-844e.ngrok.io/api/linkedin/webhook',
+      url: 'https://886e-2a0d-6fc0-84f0-1a00-f6-5eb5-2b5d-ba6b.jp.ngrok.io/api/linkedin/webhook',
     });
+
+    console.log(url);
+    console.log(body);
 
     const response = await fetch(url, {
       method: 'POST',

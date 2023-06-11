@@ -9,9 +9,11 @@ import {
   getSubscriptionsHandler,
   getUserPagesHandler,
   handleDeleteLeadgenSubscription,
+  refreshPageLongLivedAccessToken,
   webhookChallengeHandler,
 } from './facebook.controller';
 import {
+  RefreshPageLongLivedAccessTokenSchema,
   createLeadgenSubscriptionSchema,
   deleteLeadgenSubscriptionSchema,
   editLeadgenSubscriptionSchema,
@@ -32,6 +34,12 @@ export function facebookRoute(
   app.post('/webhook', { schema: getNewLeadDataSchema }, getNewLeadDataHandler);
   app.get('/pages', { schema: getUserPagesSchema }, getUserPagesHandler);
   app.get('/forms', { schema: getPageFormsSchema }, getPageFormsHandler);
+
+  app.post(
+    '/refreshAccessToken',
+    { schema: RefreshPageLongLivedAccessTokenSchema },
+    refreshPageLongLivedAccessToken
+  );
 
   app.post(
     '/subscribe',
